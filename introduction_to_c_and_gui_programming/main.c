@@ -36,6 +36,11 @@ void rdo_state(GtkButton* btn, gpointer ptr) {
     }
 }
 
+void pick_and_choose(GtkButton* btn, gpointer ptr) {
+  char *selected = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(btn));
+  gtk_label_set_text(GTK_LABEL(ptr), selected);
+}
+
 int main(int argc, char *argv[]) {
   gtk_init (&argc, &argv);
   GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -64,6 +69,16 @@ int main(int argc, char *argv[]) {
   GtkWidget *v_stat_lbl = gtk_label_new("X");
   GtkWidget *rdo_btns_lbl = gtk_label_new("radio_buttons");
   GtkWidget *rdo_btns_out = gtk_label_new("1");
+  GtkWidget *opts_lbl = gtk_label_new("options");
+  GtkWidget *opts_out = gtk_label_new("b");
+
+  GtkWidget *combo_box = gtk_combo_box_text_new();
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "a");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "b");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "c");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "d");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "e");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo_box), 1);
 
 
   g_signal_connect(close_button, "clicked", G_CALLBACK(end_program), NULL);
@@ -74,6 +89,33 @@ int main(int argc, char *argv[]) {
   g_signal_connect(rdo_btn1, "clicked", G_CALLBACK(rdo_state), rdo_btns_out); // must be a better way
   g_signal_connect(rdo_btn2, "clicked", G_CALLBACK(rdo_state), rdo_btns_out);
 
+  g_signal_connect(combo_box, "changed", G_CALLBACK(pick_and_choose), opts_out);
+
+  /*
+   * and now more complicated way yo have boxes... will try later.
+   int pos = 0;
+ GtkListStore *ls = gtk_list_store_new (1, G_TYPE_STRING);
+ gtk_list_store_insert_with_values (ls, NULL, pos++, 0, "Option 1", -1);
+ gtk_list_store_insert_with_values (ls, NULL, pos++, 0, "Option 2", -1);
+ gtk_list_store_insert_with_values (ls, NULL, pos++, 0, "Option 3", -1);
+ GtkWidget *comb = gtk_combo_box_new_with_model ( GTK_TREE_MODEL (ls));
+ GtkCellRenderer *rend = gtk_cell_renderer_text_new ();
+ gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (comb), rend, FALSE);
+ gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (comb), rend, "text", 0);
+
+  GtkWidget *comb = gtk_combo_box_new_with_model ( GTK_TREE_MODEL (ls));
+  GtkCellRenderer *rend = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (comb), rend, FALSE);
+  gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (comb), rend,  "text", 0);
+
+  GtkTreeModelSort *sorted = GTK_TREE_MODEL_SORT (
+ gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (ls)));
+ gtk_tree_sortable_set_sort_column_id (
+ GTK_TREE_SORTABLE (sorted), 0, GTK_SORT_ASCENDING);
+ GtkWidget *comb = gtk_combo_box_new_with_model (
+ GTK_TREE_MODEL (sorted));
+
+   */
   GtkWidget *grid = gtk_grid_new();
 
   gtk_grid_attach(GTK_GRID(grid), btn2, 0, 0, 1, 1);
@@ -95,7 +137,11 @@ int main(int argc, char *argv[]) {
   gtk_grid_attach(GTK_GRID(grid), rdo_btn2, 2, 4, 1, 1);
   gtk_grid_attach(GTK_GRID(grid), rdo_btns_out, 2, 4, 1, 1); // todo how?
 
-  gtk_grid_attach(GTK_GRID(grid), close_button, 0, 5, 3, 1);
+  gtk_grid_attach(GTK_GRID(grid), opts_lbl, 0, 5, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), combo_box, 1, 5, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), opts_out, 2, 5, 1, 1);
+
+  gtk_grid_attach(GTK_GRID(grid), close_button, 0, 6, 3, 1);
 
   gtk_container_add(GTK_CONTAINER(win), grid);
   gtk_widget_show_all(win);
