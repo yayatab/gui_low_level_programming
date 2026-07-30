@@ -23,14 +23,13 @@ int main(int argc, char *argv[]) {
   g_signal_connect(btn, "clicked", G_CALLBACK(end_program), NULL);
   g_signal_connect(btn2, "clicked", G_CALLBACK(count_clicked), lbl);
 
-  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
-  GtkWidget *box2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_pack_start(GTK_BOX(box2), btn2, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(box2), lbl, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(box), box2, TRUE, TRUE, 1);
-  gtk_box_pack_start(GTK_BOX(box), btn, FALSE, FALSE, 0);
+  GtkWidget *grid = gtk_grid_new();
 
-  gtk_container_add(GTK_CONTAINER(win), box);
+  gtk_grid_attach(GTK_GRID(grid), btn2, 0, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), lbl, 1, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), btn, 1, 1, 1, 1);
+
+  gtk_container_add(GTK_CONTAINER(win), grid);
   gtk_widget_show_all(win);
   gtk_main();
   return 0;
