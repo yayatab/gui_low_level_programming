@@ -55,6 +55,17 @@ int engine_update(const Engine* engine){
   return 0;
 }
 
+int engine_handle_events(Engine* engine){
+  SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_EVENT_QUIT) {
+        engine->is_running = false;
+      }
+    }
+
+  return 0;
+}
+
 
 
 int engine_cleanup(Engine* engine) {

@@ -19,6 +19,8 @@ int engine_run(Engine *engine);
 
 int engine_update(const Engine *engine);
 
+int engine_handle_events(Engine *engine);
+
 int engine_load_func(Engine *engine, void* func);
 
 int engine_stop(Engine *engine);

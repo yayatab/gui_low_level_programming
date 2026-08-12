@@ -17,20 +17,12 @@ int main(int argc, char* argv[]) {
     return error;
   }
 
-  bool running = true;
-
-  SDL_Event event;
   uint32_t frameCounter = 0;
 
-  while (running) {
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_EVENT_QUIT) {
-        running = false;
-      }
-    }
+  while (engine.is_running) {
+    engine_handle_events(&engine);
 
     frameCounter++;
-    // [Fractal math core manipulation loop over pixelBuffer]
     for (int y = 0; y < engine.height; y++) {
       for (int x = 0; x < engine.width; x++) {
         const int index = y * engine.width + x;
