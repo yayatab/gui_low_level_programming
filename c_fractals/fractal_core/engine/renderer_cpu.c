@@ -12,7 +12,7 @@ void renderer_cpu_init(RendererCPU* renderer, SDL_Renderer* sdl_renderer, int wi
 // TODO error handlers
   renderer->width = width;
   renderer->height = height;
-  renderer->pixels = malloc(pitch * pitch);
+  renderer->pixels = malloc(pitch * height);
   renderer->texture = SDL_CreateTexture(sdl_renderer,SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, width, height);
   renderer->pitch = pitch;
 }
@@ -51,7 +51,7 @@ void renderer_cpu_set_pixel(const RendererCPU *renderer,const  int px,const  int
 }
 
 void renderer_cpu_get_buffer(const RendererCPU *renderer, colour_t* out) {
- *out = *renderer->pixels;
+ out = renderer->pixels;
 }
 
 
