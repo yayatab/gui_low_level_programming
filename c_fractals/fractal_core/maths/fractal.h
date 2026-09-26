@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 
-static const size_t MAX_ITERATIONS = 500;
+static const size_t FRACTAL_MAX_ITERATIONS = 1000;
 
 typedef enum {
   FRACTAL_MANDELBROT,

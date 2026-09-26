@@ -70,14 +70,6 @@ void renderer_cpu_present(RendererCPU *renderer, SDL_Renderer *sdl_renderer) {
 #pragma endregion
 
 
-
-
-
-
-
-
-
-
 #pragma region color
 inline uint32_t create_colour(const int r,const int g,const int b,const int a){
   return  (r << 24) | (g << 16) | (b << 8) | a;
