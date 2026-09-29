@@ -6,8 +6,6 @@
 #include "viewport.h"
 #include "mandelbrot_set.h"
 #include "palette.h"
-#include "renderer_cpu.h"
-
 
 #define WIN_HEIGHT 720
 #define WIN_WIDTH 1280

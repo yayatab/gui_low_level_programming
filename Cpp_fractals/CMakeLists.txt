@@ -19,5 +19,4 @@ target_link_libraries(fractal_check PRIVATE sfml-graphics sfml-window sfml-syste
 
 add_subdirectory(app)
 add_subdirectory(fractal_core)
-add_subdirectory(renderer_cpu)
 

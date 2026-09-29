@@ -18,7 +18,6 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
   engine->thread_count = thread_count;
   engine->palette_index = 0;
   engine->is_running = false;
-  engine->iteration_buffer = malloc(width * height * sizeof(float));
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Unable to initialize SDL3: %s", SDL_GetError());
@@ -35,10 +34,28 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
   engine->texture = SDL_CreateTexture(engine->renderer, SDL_PIXELFORMAT_RGBA8888,
                                       SDL_TEXTUREACCESS_STREAMING, width, height);
 
+  if (!engine->texture) {
+    SDL_Log("Failed to create SDL texture: %s", SDL_GetError());
+    SDL_DestroyRenderer(engine->renderer);
+    SDL_DestroyWindow(engine->window);
+    SDL_Quit();
+    return 1;
+  }
+
   engine->pixel_buffer = malloc(width * height * sizeof(uint32_t));
 
   if (!engine->pixel_buffer) {
     SDL_Log("Failed to allocate heap pixel buffer");
+    SDL_DestroyTexture(engine->texture);
+    SDL_DestroyRenderer(engine->renderer);
+    SDL_DestroyWindow(engine->window);
+    SDL_Quit();
+    return 1;
+  }
+  engine->iteration_buffer = malloc(width * height * sizeof(float));
+  if (!engine->iteration_buffer) {
+    free(engine->pixel_buffer);
+    SDL_Log("Failed to allocate heap iteration buffer");
     SDL_DestroyTexture(engine->texture);
     SDL_DestroyRenderer(engine->renderer);
     SDL_DestroyWindow(engine->window);
@@ -198,6 +215,9 @@ int engine_cleanup(Engine* engine) {
   SDL_DestroyWindow(engine->window);
   SDL_Quit();
   free(engine->iteration_buffer);
+  free(engine->pixel_buffer);
+  engine->pixel_buffer = NULL;
+  engine->iteration_buffer = NULL;
 
   return 0;
 }
