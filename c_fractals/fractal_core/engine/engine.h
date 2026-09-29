@@ -16,6 +16,7 @@ typedef struct {
   size_t thread_count;
   ThreadPool thread_pool;
   int palette_index;
+  float* iteration_buffer;
 } Engine;
 
 

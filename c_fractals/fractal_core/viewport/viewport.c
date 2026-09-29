@@ -13,11 +13,13 @@ void viewport_init(Viewport* vp,
   vp->zoom = zoom;
   vp->screen_width = screen_w;
   vp->screen_height = screen_h;
+  vp->dirty = true;
 }
 
 void viewport_resize(Viewport* vp, const int new_w, const int new_h) {
   vp->screen_width = new_w;
   vp->screen_height = new_h;
+  vp->dirty = true;
 }
 
 void viewport_screen_to_math(const Viewport* vp, Vec2d* out, const int px, const int py) {
@@ -51,6 +53,7 @@ void viewport_pan(Viewport* vp, const double delta_px, const double delta_py) {
   const double delta_math_py = delta_py / vp->zoom;
   vp->center_x -= delta_math_px;
   vp->center_y += delta_math_py;
+  vp->dirty = true;
 }
 
 void viewport_zoom_at(Viewport* vp, const int px, const int py, const double factor) {
@@ -62,6 +65,15 @@ void viewport_zoom_at(Viewport* vp, const int px, const int py, const double fac
 
   vp->center_x = math_x - (px - vp->screen_width * 0.5) / vp->zoom * aspect_correction_ratio;
   vp->center_y = math_y + (py - vp->screen_height * 0.5) / vp->zoom;
+  vp->dirty = true;
+}
+
+void viewport_set_center(Viewport *vp, double center_x, double center_y) {
+  Vec2d target;
+  viewport_screen_to_math(vp, &target, (int)center_x, (int)center_y);
+  vp->center_x = target.x;
+  vp->center_y = target.y;
+  vp->dirty = true;
 }
 
 void viewport_get_bounds(const Viewport* vp, double* min_x, double* max_x, double* min_y, double* max_y) {

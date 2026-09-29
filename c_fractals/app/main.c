@@ -27,25 +27,31 @@ typedef struct {
   const PaletteLUT* lut;
 } FractalRenderContext;
 
-static void render_fractal_row(int y, void* data) {
+static void colorize_row(int y, void* data) {
   const FractalRenderContext* ctx = (FractalRenderContext*)data;
-  Vec2d out;
-  Vec2d start;
-  Vec2d next;
-  viewport_screen_to_math(ctx->vp, &start, 0, y);
-  viewport_screen_to_math(ctx->vp, &next, 1, y);
-  double dx = next.x - start.x;
-  out.y = start.y;
-  out.x = start.x;
-  for (long x = 0; x < ctx->engine->width; x++, out.x += dx) {
-    float iterations = ctx->mandelbrot->calculate_escape(out.x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
-    const int index = y * ctx->engine->width + x;
+  const int row_offset = y * ctx->engine->width;
+  for (long x = 0; x < ctx->engine->width; x++) {
+    const int index = row_offset + x;
+    float iterations = ctx->engine->iteration_buffer[index];
     if (iterations >= FRACTAL_MAX_ITERATIONS) {
       ctx->engine->pixel_buffer[index] = create_colour(0, 0, 0, 255);
     } else {
       float t = iterations * 0.02f + ctx->frameCounter * 0.005f;
       ctx->engine->pixel_buffer[index] = palette_lut_sample(ctx->lut, t);
     }
+  }
+}
+
+static void compute_fractal_row(int y, void* data) {
+  const FractalRenderContext* ctx = (FractalRenderContext*)data;
+  Vec2d start, next;
+  viewport_screen_to_math(ctx->vp, &start, 0, y);
+  viewport_screen_to_math(ctx->vp, &next, 1, y);
+  double dx = next.x - start.x;
+  double math_x = start.x;
+  for (long x = 0; x < ctx->engine->width; x++, math_x += dx) {
+    float iterations = ctx->mandelbrot->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
+    ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
   }
 }
 
@@ -109,7 +115,12 @@ int main(int argc, char* argv[]) {
         .lut = &PALETTE_LUTS[engine.palette_index],
     };
 
-    engine_parallel_for(&engine, 0, engine.height, render_fractal_row, &ctx);
+    if (vp.dirty) {
+      engine_parallel_for(&engine, 0, engine.height, compute_fractal_row, &ctx);
+      vp.dirty = false;
+    }
+
+    engine_parallel_for(&engine, 0, engine.height, colorize_row, &ctx);
 
     if (engine_update(&engine)) {
       printf("Engine update failed\n");

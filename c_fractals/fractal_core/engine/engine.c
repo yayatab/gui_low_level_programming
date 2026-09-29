@@ -18,6 +18,7 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
   engine->thread_count = thread_count;
   engine->palette_index = 0;
   engine->is_running = false;
+  engine->iteration_buffer = malloc(width * height * sizeof(float));
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Unable to initialize SDL3: %s", SDL_GetError());
@@ -76,10 +77,7 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
 
       case SDL_EVENT_MOUSE_BUTTON_DOWN:
         if (event.button.button == SDL_BUTTON_RIGHT) {
-          Vec2d target;
-          viewport_screen_to_math(vp, &target, (int)event.button.x, (int)event.button.y);
-          vp->center_x = target.x;
-          vp->center_y = target.y;
+          viewport_set_center(vp, event.button.x, event.button.y);
         } else if (event.button.button == SDL_BUTTON_LEFT) {
           is_dragging = true;
         }
@@ -199,6 +197,7 @@ int engine_cleanup(Engine* engine) {
   SDL_DestroyRenderer(engine->renderer);
   SDL_DestroyWindow(engine->window);
   SDL_Quit();
+  free(engine->iteration_buffer);
 
   return 0;
 }

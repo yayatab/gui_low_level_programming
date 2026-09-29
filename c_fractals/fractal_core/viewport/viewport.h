@@ -1,9 +1,11 @@
 #pragma once
+#include <stdbool.h>
 
 typedef struct {
   double center_x, center_y;
   double zoom; // pixels per unit of math space
   int screen_width, screen_height;
+  bool dirty;
 } Viewport;
 
 typedef struct {
@@ -79,6 +81,8 @@ void viewport_pan(Viewport *vp, double delta_px, double delta_py);
  * @param factor
  */
 void viewport_zoom_at(Viewport *vp, int px, int py, double factor);
+
+void viewport_set_center(Viewport* vp, double center_x, double center_y);
 
 #pragma endregion
 
