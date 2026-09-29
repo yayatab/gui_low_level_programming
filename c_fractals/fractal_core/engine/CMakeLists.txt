@@ -1,6 +1,8 @@
 add_library(sfml_engine
         engine.c
         engine.h
+        thread_pool.c
+        thread_pool.h
 )
 
 target_include_directories(sfml_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

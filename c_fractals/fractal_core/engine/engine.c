@@ -1,13 +1,21 @@
 #include "engine.h"
 
+#include <stdlib.h>
+
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_log.h"
 
-#include <stdlib.h>
+#include "thread_pool.h"
 
-int engine_init(Engine* engine, const int height, const int width) {
+
+int engine_init(Engine *engine,const  int height, const int width) {
+  return engine_init_mt(engine, height, width, 1);
+}
+
+int engine_init_mt(Engine* engine, const int height, const int width, const size_t thread_count) {
   engine->width = width;
   engine->height = height;
+  engine->thread_count = thread_count;
 
   engine->is_running = false;
 
@@ -35,7 +43,7 @@ int engine_init(Engine* engine, const int height, const int width) {
     SDL_Quit();
     return 1;
   }
-
+  thread_pool_init(&engine->thread_pool, engine->thread_count);
   engine->is_running = true;
 
   return 0;
@@ -67,11 +75,16 @@ int engine_handle_events(Engine* engine){
 }
 
 
+void engine_parallel_for(Engine *engine, int start, int end, ParallelForFunc func, void *user_data) {
+  thread_pool_parallel_for(&engine->thread_pool, start, end, func, user_data);
+}
 
 int engine_cleanup(Engine* engine) {
+  thread_pool_destroy(&engine->thread_pool);
   SDL_DestroyTexture(engine->texture);
   SDL_DestroyRenderer(engine->renderer);
   SDL_DestroyWindow(engine->window);
   SDL_Quit();
+
   return 0;
 }
