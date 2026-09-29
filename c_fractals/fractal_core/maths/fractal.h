@@ -18,7 +18,7 @@ typedef struct {
   /**
   * Takes a mathematical coordinate (x,y) and returns the iteration result.
    */
-  size_t (*calculate_escape)(double math_x, double math_y, size_t max_iter, const void *custom_params);
+  double (*calculate_escape)(double math_x, double math_y, double max_iter, const void *custom_params);
   void (*get_default_viewport)(double *out_center_x, double *out_center_y, double *out_zoom);
 
   void (*destroy)(void* custom_data);
@@ -32,6 +32,6 @@ typedef struct {
 } FractalInstance;
 
 
-int escape_fractal(FractalInterface* config, double x, double y);
+float escape_fractal(FractalInterface* config, double x, double y);
 
 

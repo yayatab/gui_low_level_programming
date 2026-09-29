@@ -3,6 +3,8 @@ add_library(sfml_engine
         engine.h
         thread_pool.c
         thread_pool.h
+        palette.c
+        palette.h
 )
 
 target_include_directories(sfml_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

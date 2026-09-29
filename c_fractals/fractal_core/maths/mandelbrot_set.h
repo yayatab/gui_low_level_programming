@@ -32,7 +32,7 @@ void mandelbrot_init_interface(FractalInterface *out);
  * @param custom_params Optional pointer to MandelbrotConfig (or NULL for defaults).
  * @return Iteration result in [0, max_iter]. Points inside the set return max_iter.
  */
-size_t mandelbrot_calculate_escape(double math_x, double math_y, size_t max_iter, const void *custom_params);
+double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter, const void *custom_params);
 
 /**
  * Default viewport getter for Mandelbrot set.
