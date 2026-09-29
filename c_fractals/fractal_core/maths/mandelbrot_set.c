@@ -6,6 +6,17 @@
 #define LN2 0.693147180559945309417
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+static bool check_inside_set(double math_x, double math_y) {
+  double x0 = math_x - .25;
+  double y2 = math_y * math_y;
+  double q = x0 * x0 + y2;
+  if (q * (q + x0) < y2 * .25) {
+    return true;
+  }
+  double x1 = math_x + 1.0;
+  return 16.0 * (x1 * x1 + y2) <= 1.0;
+}
+
 double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter, const void* custom_params) {
   if (max_iter == 0) {
     return 0.0;
@@ -15,6 +26,10 @@ double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter
   double z_r2 = 0.0, z_i2 = 0.0;
 
   float counter = 0;
+
+  if (check_inside_set(math_x, math_y)) {
+    return max_iter;
+  }
 
   while (counter < max_iter && z_r2 + z_i2 <= DEFAULT_ESCAPE_RADIUS_SQ) {
     z_i = 2. * z_r * z_i + math_y;

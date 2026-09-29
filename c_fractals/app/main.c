@@ -30,9 +30,15 @@ typedef struct {
 static void render_fractal_row(int y, void* data) {
   const FractalRenderContext* ctx = (FractalRenderContext*)data;
   Vec2d out;
-  for (long x = 0; x < ctx->engine->width; x++) {
-    viewport_screen_to_math(ctx->vp, &out, x, y);
-    float iterations = ctx->mandelbrot->calculate_escape(out.x, out.y, FRACTAL_MAX_ITERATIONS, NULL);
+  Vec2d start;
+  Vec2d next;
+  viewport_screen_to_math(ctx->vp, &start, 0, y);
+  viewport_screen_to_math(ctx->vp, &next, 1, y);
+  double dx = next.x - start.x;
+  out.y = start.y;
+  out.x = start.x;
+  for (long x = 0; x < ctx->engine->width; x++, out.x += dx) {
+    float iterations = ctx->mandelbrot->calculate_escape(out.x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
     const int index = y * ctx->engine->width + x;
     if (iterations >= FRACTAL_MAX_ITERATIONS) {
       ctx->engine->pixel_buffer[index] = create_colour(0, 0, 0, 255);
