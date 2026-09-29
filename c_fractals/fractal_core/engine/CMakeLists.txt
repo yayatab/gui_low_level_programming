@@ -1,14 +1,12 @@
 add_library(sfml_engine
         engine.c
-        engine.h
         thread_pool.c
         thread_pool.h
         palette.c
-        palette.h
 )
 
 target_include_directories(sfml_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(sfml_engine PRIVATE SDL3::SDL3)
+target_link_libraries(sfml_engine PRIVATE SDL3::SDL3 viewport)
 
 add_library(renderer_cpu
         renderer_cpu.c

@@ -12,6 +12,10 @@
 #define WIN_HEIGHT 720
 #define WIN_WIDTH 1280
 
+static const CosinePalette* PALETTES[] = {
+    &Rainbow, &FireGold, &NeonElectric, &CoolOcean, &Snowman
+};
+
 typedef struct {
   Engine* engine;
   Viewport* vp;
@@ -30,7 +34,7 @@ static void render_fractal_row(int y, void* data) {
       ctx->engine->pixel_buffer[index] = create_colour(0, 0, 0, 255);
     } else {
       float t = iterations * 0.02f + ctx->frameCounter * 0.005f;
-      ctx->engine->pixel_buffer[index] = palette_sample_cosine(&Rainbow, t);
+      ctx->engine->pixel_buffer[index] = palette_sample_cosine(PALETTES[ctx->engine->palette_index], t);
     }
   }
 }
@@ -73,17 +77,14 @@ int main(int argc, char* argv[]) {
   }
 
   uint32_t frameCounter = 0;
-
   Viewport vp;
-
   viewport_init(&vp, -0.5, 0.0, 350.0, engine.width, engine.height);
-
   FractalInterface mandelbrot;
 
   mandelbrot_init_interface(&mandelbrot);
 
   while (engine.is_running) {
-    engine_handle_events(&engine);
+    engine_handle_events(&engine, &vp);
     frameCounter++;
 
     FractalRenderContext ctx = {
