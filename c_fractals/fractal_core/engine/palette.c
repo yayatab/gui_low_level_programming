@@ -45,11 +45,23 @@ const CosinePalette CoolOcean = {
 
 
 uint32_t palette_sample_cosine(const CosinePalette* pal, float t) {
-  int rgba[3] = { 0, 0, 0};
+  int rgba[3] = {0, 0, 0};
   for (int i = 0; i < 3; ++i) {
     float angle = TWO_PI * (pal->c[i] * t + pal->d[i]);
     float val = pal->a[i] + pal->b[i] * cosf(angle);
     rgba[i] = (int)(CLAMP(val) * 255.0f);
   }
   return create_colour(rgba[0], rgba[1], rgba[2], 255);
+}
+
+void palette_lut_init(PaletteLUT* lut, const CosinePalette* palette) {
+  for (int i = 0; i < PALETTE_LUT_SIZE; ++i) {
+    float t = i / (float)PALETTE_LUT_SIZE;
+    lut->palette[i] = palette_sample_cosine(palette, t);
+  }
+}
+
+uint32_t palette_lut_sample(const PaletteLUT* lut, float t) {
+  uint32_t scalted_t = (uint32_t)(t * (float)PALETTE_LUT_SIZE);
+  return lut->palette[scalted_t & PALETTE_LUT_MASK];
 }

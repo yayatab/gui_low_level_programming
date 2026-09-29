@@ -16,11 +16,15 @@ static const CosinePalette* PALETTES[] = {
     &Rainbow, &FireGold, &NeonElectric, &CoolOcean, &Snowman
 };
 
+static PaletteLUT PALETTE_LUTS[5];
+
+
 typedef struct {
   Engine* engine;
   Viewport* vp;
   FractalInterface* mandelbrot;
   uint32_t frameCounter;
+  const PaletteLUT* lut;
 } FractalRenderContext;
 
 static void render_fractal_row(int y, void* data) {
@@ -34,7 +38,7 @@ static void render_fractal_row(int y, void* data) {
       ctx->engine->pixel_buffer[index] = create_colour(0, 0, 0, 255);
     } else {
       float t = iterations * 0.02f + ctx->frameCounter * 0.005f;
-      ctx->engine->pixel_buffer[index] = palette_sample_cosine(PALETTES[ctx->engine->palette_index], t);
+      ctx->engine->pixel_buffer[index] = palette_lut_sample(ctx->lut, t);
     }
   }
 }
@@ -83,6 +87,10 @@ int main(int argc, char* argv[]) {
 
   mandelbrot_init_interface(&mandelbrot);
 
+  for (size_t i = 0; i < sizeof(PALETTES) / sizeof(PALETTES[0]); ++i) {
+    palette_lut_init(&PALETTE_LUTS[i], PALETTES[i]);
+  }
+
   while (engine.is_running) {
     engine_handle_events(&engine, &vp);
     frameCounter++;
@@ -91,7 +99,8 @@ int main(int argc, char* argv[]) {
         .engine = &engine,
         .vp = &vp,
         .mandelbrot = &mandelbrot,
-        .frameCounter = frameCounter
+        .frameCounter = frameCounter,
+        .lut = &PALETTE_LUTS[engine.palette_index],
     };
 
     engine_parallel_for(&engine, 0, engine.height, render_fractal_row, &ctx);
