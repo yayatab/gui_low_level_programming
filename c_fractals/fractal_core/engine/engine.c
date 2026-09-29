@@ -65,63 +65,123 @@ int engine_update(const Engine* engine) {
 
 int engine_handle_events(Engine* engine, Viewport* vp) {
   SDL_Event event;
-  bool is_dragging = false;
+  static bool is_dragging = false;
+  const double pan_step = 30.0; // pixel step for keyboard panning
+
   while (SDL_PollEvent(&event)) {
-    if (event.type == SDL_EVENT_QUIT) {
-      engine->is_running = false;
-    }
-    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-      if (event.button.button == SDL_BUTTON_RIGHT) {
-        viewport_pan(vp, event.motion.x, event.motion.y);
-      }
-      if (event.button.button == SDL_BUTTON_LEFT) {
-        is_dragging = true;
-      }
-    }
-    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
-      is_dragging = false;
-    }
-    if (event.type == SDL_EVENT_MOUSE_MOTION) {
-      if (is_dragging) {
-        viewport_pan(vp, event.motion.xrel, event.motion.yrel);
-      }
-    }
-    if (event.type == SDL_EVENT_MOUSE_WHEEL) {
-      float factor = event.wheel.y;
-      viewport_zoom_at(vp, (int)event.wheel.mouse_x, (int)event.wheel.mouse_y, factor);
-    }
-    if (event.type == SDL_EVENT_KEY_DOWN) {
-      switch (event.key.key) {
-        case SDLK_ESCAPE:
-        case SDLK_Q:
-          engine->is_running = false;
-          break;
-        case SDLK_1:
-          engine->palette_index = 0;
-          break;
-        case SDLK_2:
-          engine->palette_index = 1;
-          break;
-        case SDLK_3:
-          engine->palette_index = 2;
-          break;
-        case SDLK_4:
-          engine->palette_index = 3;
-          break;
-        case SDLK_5:
-          engine->palette_index = 4;
-          break;
-        case SDLK_C:
-          engine->palette_index = (engine->palette_index + 1) % 5;
-          break;
-        case SDLK_R:
-          viewport_init(vp, 0.0, 0.0, 350, engine->width, engine->height);
-          break;
-        case SDLK_QUESTION:
-          printf("showing help");
-        default:
-          break;
-      }
+    switch (event.type) {
+      case SDL_EVENT_QUIT:
+        engine->is_running = false;
+        break;
+
+      case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        if (event.button.button == SDL_BUTTON_RIGHT) {
+          Vec2d target;
+          viewport_screen_to_math(vp, &target, (int)event.button.x, (int)event.button.y);
+          vp->center_x = target.x;
+          vp->center_y = target.y;
+        } else if (event.button.button == SDL_BUTTON_LEFT) {
+          is_dragging = true;
+        }
+        break;
+
+      case SDL_EVENT_MOUSE_BUTTON_UP:
+        if (event.button.button == SDL_BUTTON_LEFT) {
+          is_dragging = false;
+        }
+        break;
+
+      case SDL_EVENT_MOUSE_MOTION:
+        if (is_dragging) {
+          viewport_pan(vp, event.motion.xrel, event.motion.yrel);
+        }
+        break;
+
+      case SDL_EVENT_MOUSE_WHEEL:
+        if (event.wheel.y != 0.0f) {
+          const double factor = (event.wheel.y > 0.0f) ? 1.15 : (1.0 / 1.15);
+          viewport_zoom_at(vp, (int)event.wheel.mouse_x, (int)event.wheel.mouse_y, factor);
+        }
+        break;
+
+      case SDL_EVENT_KEY_DOWN:
+        switch (event.key.key) {
+          case SDLK_ESCAPE:
+          case SDLK_Q:
+            engine->is_running = false;
+            break;
+
+          // Panning: WASD and Arrow keys
+          case SDLK_W:
+          case SDLK_UP:
+            viewport_pan(vp, 0.0, pan_step);
+            break;
+          case SDLK_S:
+          case SDLK_DOWN:
+            viewport_pan(vp, 0.0, -pan_step);
+            break;
+          case SDLK_A:
+          case SDLK_LEFT:
+            viewport_pan(vp, pan_step, 0.0);
+            break;
+          case SDLK_D:
+          case SDLK_RIGHT:
+            viewport_pan(vp, -pan_step, 0.0);
+            break;
+
+          // Zooming: + / - keys (centered on screen)
+          case SDLK_PLUS:
+          case SDLK_EQUALS:
+          case SDLK_KP_PLUS:
+            viewport_zoom_at(vp, engine->width / 2, engine->height / 2, 1.15);
+            break;
+          case SDLK_MINUS:
+          case SDLK_KP_MINUS:
+            viewport_zoom_at(vp, engine->width / 2, engine->height / 2, 1.0 / 1.15);
+            break;
+
+          // Palette switching
+          case SDLK_1:
+            engine->palette_index = 0;
+            break;
+          case SDLK_2:
+            engine->palette_index = 1;
+            break;
+          case SDLK_3:
+            engine->palette_index = 2;
+            break;
+          case SDLK_4:
+            engine->palette_index = 3;
+            break;
+          case SDLK_5:
+            engine->palette_index = 4;
+            break;
+          case SDLK_C:
+            engine->palette_index = (engine->palette_index + 1) % 5;
+            break;
+
+          // Reset view
+          case SDLK_R:
+            viewport_init(vp, -0.5, 0.0, 350.0, engine->width, engine->height);
+            break;
+
+          case SDLK_QUESTION:
+            printf("Controls:\n"
+                "  WASD / Arrows : Pan\n"
+                "  + / - / Wheel : Zoom\n"
+                "  Left-drag     : Pan with mouse\n"
+                "  Right-click   : Recenter at cursor\n"
+                "  1-5 / C       : Switch palette\n"
+                "  R             : Reset viewport\n"
+                "  Q / ESC       : Quit\n");
+            break;
+          default:
+            break;
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
