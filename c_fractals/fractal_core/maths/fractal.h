@@ -1,11 +1,11 @@
 #pragma once
 #include <stdlib.h>
 
-static const size_t FRACTAL_MAX_ITERATIONS = 1000;
+static const size_t FRACTAL_MAX_ITERATIONS = 1500;
 
 typedef enum {
   FRACTAL_MANDELBROT,
-  FRACTAL_JULIAN,
+  FRACTAL_JULIA,
   FRACTAL_NEWTON,
   SIERPINSKI_TRIANGLE,
   KOCH_SNOWFLAKE,
@@ -32,6 +32,6 @@ typedef struct {
 } FractalInstance;
 
 
-float escape_fractal(FractalInterface* config, double x, double y);
+double escape_fractal(FractalInterface* config, double x, double y);
 
 

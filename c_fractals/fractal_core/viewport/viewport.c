@@ -84,3 +84,7 @@ void viewport_get_bounds(const Viewport* vp, double* min_x, double* max_x, doubl
   *min_y = vp->center_y - vp->screen_height * 0.5 / vp->zoom;
   *max_y = vp->center_y + vp->screen_height * 0.5 / vp->zoom;
 }
+
+void viewport_recalculate(Viewport* vp) {
+  vp->dirty = true;
+}

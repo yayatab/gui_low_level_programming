@@ -33,6 +33,8 @@ void viewport_init(Viewport *vp, double center_x, double center_y, double zoom, 
  */
 void viewport_resize(Viewport *vp, int new_w, int new_h);
 
+void viewport_recalculate(Viewport *vp);
+
 #pragma endregion
 
 #pragma region Coordinate Transformations

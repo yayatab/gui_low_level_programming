@@ -1,6 +1,7 @@
 #pragma once
 #include "thread_pool.h"
 #include "viewport.h"
+#include "fractal.h"
 
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
@@ -17,6 +18,8 @@ typedef struct {
   size_t thread_count;
   ThreadPool thread_pool;
   int palette_index;
+  int julia_index;
+  int fractal_index;
   float* iteration_buffer;
 } Engine;
 
@@ -30,6 +33,9 @@ void engine_parallel_for(Engine* engine, int start, int end, ParallelForFunc fun
 int engine_update(const Engine* engine);
 
 int engine_handle_events(Engine* engine, Viewport* vp);
+
+void engine_change_set(Engine* engine);
+
 
 /**
  * Cleanup the engine data

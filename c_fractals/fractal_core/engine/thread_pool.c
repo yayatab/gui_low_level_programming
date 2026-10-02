@@ -52,7 +52,7 @@ int thread_pool_init(ThreadPool* pool, size_t thread_count) {
   pool->end_index =0;
   char name[256];
   for (int i = 0; i < pool->thread_count; i++) {
-    sprintf(name, "thread_pool_%d", pool->thread_count);
+    sprintf(name, "thread_pool_%lu", pool->thread_count);
     pool->threads[i] = SDL_CreateThread(worker_thread_fn, name, pool);
   }
   return 0;

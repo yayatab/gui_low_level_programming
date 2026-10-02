@@ -17,7 +17,7 @@ static bool check_inside_set(double math_x, double math_y) {
   return 16.0 * (x1 * x1 + y2) <= 1.0;
 }
 
-double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter, const void* custom_params) {
+double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter, const void* _) {
   if (max_iter == 0) {
     return 0.0;
   }
@@ -25,7 +25,7 @@ double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter
   double z_r = 0.0, z_i = 0.0;
   double z_r2 = 0.0, z_i2 = 0.0;
 
-  float counter = 0;
+  double counter = 0;
 
   if (check_inside_set(math_x, math_y)) {
     return max_iter;
@@ -41,7 +41,7 @@ double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter
   }
 
   if (counter < max_iter) {
-    return counter + 1.0f - log2f(0.5f * logf((float)(z_i2 + z_r2)));
+    return counter + 1.0 - log2(0.5 * log(z_i2 + z_r2));
   }
   return max_iter;
 }

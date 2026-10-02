@@ -17,6 +17,8 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
   engine->height = height;
   engine->thread_count = thread_count;
   engine->palette_index = 0;
+  engine->fractal_index = 0;
+  engine->julia_index = 0;
   engine->is_running = false;
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -154,6 +156,14 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
           case SDLK_KP_MINUS:
             viewport_zoom_at(vp, engine->width / 2, engine->height / 2, 1.0 / 1.15);
             break;
+          case SDLK_F:
+            engine_change_set(engine);
+            viewport_recalculate(vp);
+            break;
+          case SDLK_J:
+            engine->julia_index = (engine->julia_index + 1) % 6;
+            viewport_recalculate(vp);
+            break;
 
           // Palette switching
           case SDLK_1:
@@ -201,6 +211,10 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
   }
 
   return 0;
+}
+
+void engine_change_set(Engine* engine) {
+  engine->fractal_index = (engine->fractal_index + 1) % 2;
 }
 
 

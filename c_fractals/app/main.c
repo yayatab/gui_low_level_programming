@@ -6,6 +6,7 @@
 #include "viewport.h"
 #include "mandelbrot_set.h"
 #include "palette.h"
+#include "julia.h"
 
 #define WIN_HEIGHT 720
 #define WIN_WIDTH 1280
@@ -14,14 +15,21 @@ static const CosinePalette* PALETTES[] = {
     &Rainbow, &FireGold, &NeonElectric, &CoolOcean, &Snowman
 };
 
+static const JuliaConfig* JuliaConfigs[] = {
+    &JULIA_CLASSIC_SPIRAL, &JULIA_CLASSIC_SPIRAL2, &JULIA_DOUDY_RABBIT, &JULIA_DOUBLE_RABBIT, &JULIA_BASILLICA,
+    &JULIA_JETBRAINS
+};
+
+
 static PaletteLUT PALETTE_LUTS[5];
 
 
 typedef struct {
   Engine* engine;
   Viewport* vp;
-  FractalInterface* mandelbrot;
-  uint32_t frameCounter;
+  uint32_t frame_counter;
+  FractalInterface* fractal_instance;
+  const JuliaConfig* julia_config;
   const PaletteLUT* lut;
 } FractalRenderContext;
 
@@ -30,11 +38,11 @@ static void colorize_row(int y, void* data) {
   const int row_offset = y * ctx->engine->width;
   for (long x = 0; x < ctx->engine->width; x++) {
     const int index = row_offset + x;
-    float iterations = ctx->engine->iteration_buffer[index];
+    double iterations = ctx->engine->iteration_buffer[index];
     if (iterations >= FRACTAL_MAX_ITERATIONS) {
       ctx->engine->pixel_buffer[index] = create_colour(0, 0, 0, 255);
     } else {
-      float t = iterations * 0.02f + ctx->frameCounter * 0.005f;
+      double t = iterations * 0.02f + ctx->frame_counter * 0.005f;
       ctx->engine->pixel_buffer[index] = palette_lut_sample(ctx->lut, t);
     }
   }
@@ -48,12 +56,13 @@ static void compute_fractal_row(int y, void* data) {
   double dx = next.x - start.x;
   double math_x = start.x;
   for (long x = 0; x < ctx->engine->width; x++, math_x += dx) {
-    float iterations = ctx->mandelbrot->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
+    double iterations = ctx->fractal_instance->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS,
+                                                                ctx->julia_config);
     ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
   }
 }
 
-void rainbow_pattern(Engine* engine, uint32_t frameCounter) {
+static void rainbow_pattern(Engine* engine, uint32_t frameCounter) {
   for (int y = 0; y < engine->height; y++) {
     for (int x = 0; x < engine->width; x++) {
       const int index = y * engine->width + x;
@@ -93,9 +102,9 @@ int main(int argc, char* argv[]) {
   uint32_t frameCounter = 0;
   Viewport vp;
   viewport_init(&vp, -0.5, 0.0, 350.0, engine.width, engine.height);
-  FractalInterface mandelbrot;
-
-  mandelbrot_init_interface(&mandelbrot);
+  FractalInterface fractal_instances[2];
+  mandelbrot_init_interface(&fractal_instances[0]);
+  julia_init_interface(&fractal_instances[1]);
 
   for (size_t i = 0; i < sizeof(PALETTES) / sizeof(PALETTES[0]); ++i) {
     palette_lut_init(&PALETTE_LUTS[i], PALETTES[i]);
@@ -108,9 +117,10 @@ int main(int argc, char* argv[]) {
     FractalRenderContext ctx = {
         .engine = &engine,
         .vp = &vp,
-        .mandelbrot = &mandelbrot,
-        .frameCounter = frameCounter,
+        .frame_counter = frameCounter,
         .lut = &PALETTE_LUTS[engine.palette_index],
+        .fractal_instance = &fractal_instances[engine.fractal_index],
+        .julia_config = JuliaConfigs[engine.julia_index],
     };
 
     if (vp.dirty) {

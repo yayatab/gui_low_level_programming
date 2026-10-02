@@ -2,8 +2,6 @@
 
 #include <math.h>
 
-#include "engine.h"
-
 #define TWO_PI 6.283185307179586f
 #define CLAMP(x) ((x) < 0.0f ? 0.0f : ((x) > 1.0f ? 1.0f : (x)))
 
@@ -42,9 +40,6 @@ const CosinePalette CoolOcean = {
     .d = {0.80f, 0.90f, 0.30f}
 };
 
-inline uint32_t create_colour(const int r, const int g, const int b, const int a) {
-  return (r << 24) | (g << 16) | (b << 8) | a;
-}
 
 uint32_t palette_sample_cosine(const CosinePalette* pal, float t) {
   int rgba[3] = {0, 0, 0};
@@ -66,4 +61,8 @@ void palette_lut_init(PaletteLUT* lut, const CosinePalette* palette) {
 uint32_t palette_lut_sample(const PaletteLUT* lut, float t) {
   uint32_t scalted_t = (uint32_t)(t * (float)PALETTE_LUT_SIZE);
   return lut->palette[scalted_t & PALETTE_LUT_MASK];
+}
+
+colour_t create_colour(int r, int g, int b, int a) {
+  return (r << 24) | (g << 16) | (b << 8) | a;
 }
