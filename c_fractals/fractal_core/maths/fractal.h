@@ -1,7 +1,7 @@
 #pragma once
-#include <stdlib.h>
+#include <stddef.h>
 
-#define IMPLEMENTED_FRACTALS_NUM 3
+#define IMPLEMENTED_FRACTALS_NUM 4
 
 static const size_t FRACTAL_MAX_ITERATIONS = 1500;
 
@@ -9,11 +9,11 @@ static const size_t FRACTAL_MAX_ITERATIONS = 1500;
 typedef enum {
   FRACTAL_MANDELBROT,
   FRACTAL_JULIA,
-  FRACTAL_NEWTON, //todo implement
+  BURNING_SHIP,
+  FRACTAL_NEWTON,
   SIERPINSKI_TRIANGLE, //todo implement
   KOCH_SNOWFLAKE, // todo implement
   BARNSLEY_FAN,  // todo implement
-  BURNING_SHIP,
 } FRACTAL_TYPES;
 
 typedef struct {
