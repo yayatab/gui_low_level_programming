@@ -214,7 +214,7 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
 }
 
 void engine_change_set(Engine* engine) {
-  engine->fractal_index = (engine->fractal_index + 1) % 2;
+  engine->fractal_index = (engine->fractal_index + 1) % IMPLEMENTED_FRACTALS_NUM;
 }
 
 

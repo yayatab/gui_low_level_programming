@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include "burning_ship.h"
 #include "engine.h"
 #include "viewport.h"
 #include "mandelbrot_set.h"
@@ -102,9 +103,10 @@ int main(int argc, char* argv[]) {
   uint32_t frameCounter = 0;
   Viewport vp;
   viewport_init(&vp, -0.5, 0.0, 350.0, engine.width, engine.height);
-  FractalInterface fractal_instances[2];
+  FractalInterface fractal_instances[3];
   mandelbrot_init_interface(&fractal_instances[0]);
   julia_init_interface(&fractal_instances[1]);
+  burning_ship_init_interface(&fractal_instances[2]);
 
   for (size_t i = 0; i < sizeof(PALETTES) / sizeof(PALETTES[0]); ++i) {
     palette_lut_init(&PALETTE_LUTS[i], PALETTES[i]);
