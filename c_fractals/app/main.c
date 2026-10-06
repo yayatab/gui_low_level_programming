@@ -1,4 +1,4 @@
-#include <SDL3/SDL.h>
+// #include <SDL3/SDL.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
   }
 
   uint32_t frameCounter = 0;
+  uint32_t frames_past_since_chk = 0;
   Viewport vp;
   viewport_init(&vp, -0.5, 0.0, 350.0, engine.width, engine.height);
   FractalInterface fractal_instances[4];
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]) {
 
   while (engine.is_running) {
     engine_handle_events(&engine, &vp);
+    engine_display_debug_test(&engine);
     frameCounter++;
 
     FractalRenderContext ctx = {

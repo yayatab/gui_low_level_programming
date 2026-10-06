@@ -1,6 +1,7 @@
 #include "julia.h"
 
 #include <math.h>
+#include <complex.h>
 
 #define DEFAULT_ESCAPE_RADIUS_SQ 4.0
 

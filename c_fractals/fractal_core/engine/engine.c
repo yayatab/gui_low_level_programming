@@ -4,12 +4,21 @@
 
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_log.h"
+#include "SDL3/SDL_timer.h"
 
 #include "thread_pool.h"
 
 
 int engine_init(Engine* engine, const int height, const int width) {
   return engine_init_mt(engine, height, width, 1);
+}
+
+static void init_fps_data(FpsData* fps_data) {
+  fps_data->show_fps = false;
+  fps_data->frame_counter = 0;
+  fps_data->last_fps = SDL_GetTicks();
+  fps_data->frame_time = 0.0f;
+  fps_data->fps = 0.0;
 }
 
 int engine_init_mt(Engine* engine, const int height, const int width, const size_t thread_count) {
@@ -20,6 +29,9 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
   engine->fractal_index = 0;
   engine->julia_index = 0;
   engine->is_running = false;
+  init_fps_data(&engine->fps_data);
+
+  engine->fps_data.show_fps = false;
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Unable to initialize SDL3: %s", SDL_GetError());
@@ -54,7 +66,8 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
     SDL_Quit();
     return 1;
   }
-  engine->iteration_buffer = malloc(width * height * sizeof(float));
+
+  engine->iteration_buffer = malloc(width * height * sizeof(double));
   if (!engine->iteration_buffer) {
     free(engine->pixel_buffer);
     SDL_Log("Failed to allocate heap iteration buffer");
@@ -64,13 +77,25 @@ int engine_init_mt(Engine* engine, const int height, const int width, const size
     SDL_Quit();
     return 1;
   }
+
   thread_pool_init(&engine->thread_pool, engine->thread_count);
   engine->is_running = true;
 
   return 0;
 }
 
-int engine_update(const Engine* engine) {
+static void calculate_fps_data(FpsData* fps_data) {
+  fps_data->frame_counter++;
+  uint64_t current_time = SDL_GetTicks();
+  uint64_t elapsed_time = current_time - fps_data->last_fps;
+  if (elapsed_time > 500) {
+    fps_data->fps = fps_data->frame_counter * 1000 / elapsed_time;
+    fps_data->last_fps = current_time;
+    fps_data->frame_counter = 0;
+  }
+}
+
+int engine_update(Engine* engine) {
   if (!engine->is_running) {
     return 1;
   }
@@ -79,7 +104,9 @@ int engine_update(const Engine* engine) {
 
   SDL_RenderClear(engine->renderer);
   SDL_RenderTexture(engine->renderer, engine->texture, NULL, NULL);
+  if (engine->fps_data.show_fps) { engine_display_debug_test(engine); }
   SDL_RenderPresent(engine->renderer);
+  calculate_fps_data(&engine->fps_data);
   return 0;
 }
 
@@ -184,6 +211,9 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
           case SDLK_C:
             engine->palette_index = (engine->palette_index + 1) % 5;
             break;
+          case SDLK_G:
+            engine->fps_data.show_fps = engine->fps_data.show_fps ? false : true;
+            break;
 
           // Reset view
           case SDLK_R:
@@ -215,6 +245,11 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
 
 void engine_change_set(Engine* engine) {
   engine->fractal_index = (engine->fractal_index + 1) % IMPLEMENTED_FRACTALS_NUM;
+}
+
+void engine_display_debug_test(Engine* engine) {
+  SDL_SetRenderDrawColor(engine->renderer, 255, 255, 255, 255);
+  SDL_RenderDebugTextFormat(engine->renderer, 10.0f, 10.0f, "Fps: %f", engine->fps_data.fps);
 }
 
 
