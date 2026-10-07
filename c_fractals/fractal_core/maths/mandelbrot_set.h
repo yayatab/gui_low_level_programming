@@ -1,6 +1,8 @@
 #pragma once
-#include "fractal.h"
+#include <arm_neon.h>
 #include <stdbool.h>
+
+#include "fractal.h"
 
 /**
  * Optional configuration passed via custom_params.
@@ -33,6 +35,9 @@ void mandelbrot_init_interface(FractalInterface *out);
  * @return Iteration result in [0, max_iter]. Points inside the set return max_iter.
  */
 double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter, const void *custom_params);
+
+
+float64x2_t mandelbrot_calculate_escape_x2(double math_x, double dx, double math_y, size_t max_iter, const void* _);
 
 /**
  * Default viewport getter for Mandelbrot set.

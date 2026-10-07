@@ -1,4 +1,3 @@
-// #include <SDL3/SDL.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -58,10 +57,22 @@ static void compute_fractal_row(int y, void* data) {
   viewport_screen_to_math(ctx->vp, &next, 1, y);
   double dx = next.x - start.x;
   double math_x = start.x;
-  for (long x = 0; x < ctx->engine->width; x++, math_x += dx) {
-    double iterations = ctx->fractal_instance->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS,
-                                                                ctx->julia_config);
-    ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
+  long x = 0;
+  if (ctx->fractal_instance->fractal_type == FRACTAL_MANDELBROT) {
+    for (; x + 1< ctx->engine->width; x += 2, math_x += 2 * dx) {
+      float64x2_t iters = mandelbrot_calculate_escape_x2(math_x, dx, start.y, FRACTAL_MAX_ITERATIONS, NULL);
+      vst1q_f64(&ctx->engine->iteration_buffer[y * ctx->engine->width + x], iters);
+    }
+    if (x < ctx->engine->width) {
+      double iterations = ctx->fractal_instance->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
+      ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
+    }
+  } else {
+    for (; x < ctx->engine->width; x++, math_x += dx) {
+      double iterations = ctx->fractal_instance->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS,
+                                                                  ctx->julia_config);
+      ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
+    }
   }
 }
 
@@ -88,6 +99,7 @@ int main(int argc, char* argv[]) {
       case 't':
         thread_count = strtol(optarg, NULL, 10);
         thread_count = MAX_THREAD_COUNT(thread_count);
+        printf("thread_count: %d\n", thread_count);
         break;
       default:
         fprintf(stderr, "Usage: %s [-v] [-o output_file] [inputs...]\n", argv[0]);

@@ -6,6 +6,10 @@
 #define LN2 0.693147180559945309417
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+static const float64x2_t V_TWO = {2.0, 2.0};
+static const float64x2_t V_ZERO = {0.0, 0.0};
+static const float64x2_t V_ESCAPE_SQ = {DEFAULT_ESCAPE_RADIUS_SQ, DEFAULT_ESCAPE_RADIUS_SQ};
+
 static bool check_inside_set(double math_x, double math_y) {
   double x0 = math_x - .25;
   double y2 = math_y * math_y;
@@ -45,6 +49,37 @@ double mandelbrot_calculate_escape(double math_x, double math_y, double max_iter
   }
   return max_iter;
 }
+
+float64x2_t mandelbrot_calculate_escape_x2(double math_x, double dx, double math_y, size_t max_iter, const void* _) {
+  if (max_iter == 0) { return V_ZERO; }
+  float64x2_t v_cr = {math_x, math_x + dx};
+  float64x2_t v_ci = vdupq_n_f64(math_y);
+  uint64x2_t v_iter = vdupq_n_u64(0);
+
+  float64x2_t v_zr = vdupq_n_f64(0.0);
+  float64x2_t v_zi = vdupq_n_f64(0.0);
+  float64x2_t v_zr2 = vdupq_n_f64(0.0);
+  float64x2_t v_zi2 = vdupq_n_f64(0.0);
+  float64x2_t mag_sq = vaddq_f64(v_zr2, v_zi2);
+
+  uint64x2_t active_mask = vcleq_f64(mag_sq, V_ESCAPE_SQ);
+
+  for (size_t counter = 0; counter < max_iter; ++counter) {
+    v_iter = vsubq_u64(v_iter, active_mask);
+    if ((vgetq_lane_u64(active_mask, 0) | vgetq_lane_u64(active_mask, 1)) == 0) {
+      break;
+    }
+    v_zi = vaddq_f64(vmulq_f64(V_TWO, vmulq_f64(v_zr, v_zi)), v_ci);
+    v_zr = vaddq_f64(v_cr, vsubq_f64(v_zr2, v_zi2));
+    v_zi2 = vmulq_f64(v_zi, v_zi);
+    v_zr2 = vmulq_f64(v_zr, v_zr);
+    mag_sq = vaddq_f64(v_zr2, v_zi2);
+    active_mask = vcleq_f64(mag_sq, V_ESCAPE_SQ);
+  }
+
+  return vcvtq_f64_u64(v_iter);
+}
+
 
 static void mandelbrot_destroy(void* custom_data) { (void)custom_data; }
 
