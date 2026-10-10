@@ -14,7 +14,11 @@
 #define WIN_WIDTH 1280
 
 static const CosinePalette* PALETTES[] = {
-    &Rainbow, &FireGold, &NeonElectric, &CoolOcean, &Snowman
+    &Rainbow, &FireGold, &NeonElectric, &CoolOcean, &Snowman,
+    &PurpleHaze,
+    &Forest,
+    &Cyberpunk,
+    &Monochrome,
 };
 
 static const JuliaConfig* JuliaConfigs[] = {
@@ -23,7 +27,7 @@ static const JuliaConfig* JuliaConfigs[] = {
 };
 
 
-static PaletteLUT PALETTE_LUTS[5];
+static PaletteLUT PALETTE_LUTS[9];
 
 
 typedef struct {
@@ -60,7 +64,8 @@ static void compute_fractal_row(int y, void* data) {
   long x = 0;
   if (ctx->fractal_instnc->calc_escape_2x != NULL) {
     for (; x + 1 < ctx->engine->width; x += 2, math_x += 2 * dx) {
-      float64x2_t iters = ctx->fractal_instnc->calc_escape_2x(math_x, dx, start.y, FRACTAL_MAX_ITERATIONS, ctx->julia_cfg);
+      float64x2_t iters = ctx->fractal_instnc->calc_escape_2x(math_x, dx, start.y, FRACTAL_MAX_ITERATIONS,
+                                                              ctx->julia_cfg);
       vst1q_f64(&ctx->engine->iteration_buffer[y * ctx->engine->width + x], iters);
     }
     if (x < ctx->engine->width) {

@@ -40,6 +40,31 @@ const CosinePalette CoolOcean = {
     .d = {0.80f, 0.90f, 0.30f}
 };
 
+const CosinePalette PurpleHaze = {
+    .a = {0.5f, 0.5f, 0.5f},
+    .b = {0.5f, 0.5f, 0.5f},
+    .c = {1.0f, 1.0f, 1.0f},
+    .d = {0.3f, 0.20f, 0.80f}
+};
+const CosinePalette Forest = {
+    .a = {0.2f, 0.5f, 0.2f},
+    .b = {0.2f, 0.4f, 0.2f},
+    .c = {1.0f, 1.0f, 1.0f},
+    .d = {0.0f, 0.15f, 0.3f}
+};
+const CosinePalette Cyberpunk = {
+    .a = {0.5f, 0.5f, 0.5f},
+    .b = {0.5f, 0.5f, 0.5f},
+    .c = {2.0f, 1.0f, 0.0f},
+    .d = {0.5f, 0.2f, 0.25f}
+};
+const CosinePalette Monochrome = {
+    .a = {0.5f, 0.5f, 0.5f},
+    .b = {0.5f, 0.5f, 0.5f},
+    .c = {1.0f, 1.0f, 1.0f},
+    .d = {0.0f, 0.0f, 0.0f}
+};
+
 
 uint32_t palette_sample_cosine(const CosinePalette* pal, float t) {
   int rgba[3] = {0, 0, 0};

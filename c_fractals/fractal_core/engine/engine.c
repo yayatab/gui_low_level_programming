@@ -209,7 +209,7 @@ int engine_handle_events(Engine* engine, Viewport* vp) {
             engine->palette_index = 4;
             break;
           case SDLK_C:
-            engine->palette_index = (engine->palette_index + 1) % 5;
+            engine->palette_index = (engine->palette_index + 1) % 9;
             break;
           case SDLK_G:
             engine->fps_data.show_fps = engine->fps_data.show_fps ? false : true;

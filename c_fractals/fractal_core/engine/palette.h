@@ -24,6 +24,11 @@ extern const CosinePalette Snowman;
 extern const CosinePalette FireGold;
 extern const CosinePalette NeonElectric;
 extern const CosinePalette CoolOcean;
+extern const CosinePalette PurpleHaze;
+extern const CosinePalette Forest;
+extern const CosinePalette Cyberpunk;
+extern const CosinePalette Monochrome;
+
 
 colour_t create_colour(int r, int g, int b, int a);
 
