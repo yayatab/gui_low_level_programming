@@ -20,6 +20,9 @@ void julia_init_interface(FractalInterface *out);
 
 double julia_calculate_escape(double math_x, double math_y, double max_iter, const void *custom_params);
 
+
+float64x2_t julia_calculate_escape_x2(double math_x, double dx, double math_y, size_t max_iter, const void* custom_params);
+
 void julia_get_default_viewport(double *out_center_x, double *out_center_y, double *out_zoom);
 
 void julia_destroy(void *custom_data);

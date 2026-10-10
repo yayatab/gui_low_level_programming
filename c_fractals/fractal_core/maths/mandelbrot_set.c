@@ -93,7 +93,8 @@ void mandelbrot_init_interface(FractalInterface* out) {
   if (!out) return;
   out->name = "mandelbrot_set";
   out->fractal_type = FRACTAL_MANDELBROT;
-  out->calculate_escape = &mandelbrot_calculate_escape;
+  out->calc_escape = &mandelbrot_calculate_escape;
+  out->calc_escape_2x = &mandelbrot_calculate_escape_x2;
   out->destroy = &mandelbrot_destroy;
   out->get_default_viewport = &mandelbrot_get_default_viewport;
 }

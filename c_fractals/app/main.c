@@ -30,8 +30,8 @@ typedef struct {
   Engine* engine;
   Viewport* vp;
   uint32_t frame_counter;
-  FractalInterface* fractal_instance;
-  const JuliaConfig* julia_config;
+  FractalInterface* fractal_instnc;
+  const JuliaConfig* julia_cfg;
   const PaletteLUT* lut;
 } FractalRenderContext;
 
@@ -58,19 +58,18 @@ static void compute_fractal_row(int y, void* data) {
   double dx = next.x - start.x;
   double math_x = start.x;
   long x = 0;
-  if (ctx->fractal_instance->fractal_type == FRACTAL_MANDELBROT) {
-    for (; x + 1< ctx->engine->width; x += 2, math_x += 2 * dx) {
-      float64x2_t iters = mandelbrot_calculate_escape_x2(math_x, dx, start.y, FRACTAL_MAX_ITERATIONS, NULL);
+  if (ctx->fractal_instnc->calc_escape_2x != NULL) {
+    for (; x + 1 < ctx->engine->width; x += 2, math_x += 2 * dx) {
+      float64x2_t iters = ctx->fractal_instnc->calc_escape_2x(math_x, dx, start.y, FRACTAL_MAX_ITERATIONS, ctx->julia_cfg);
       vst1q_f64(&ctx->engine->iteration_buffer[y * ctx->engine->width + x], iters);
     }
     if (x < ctx->engine->width) {
-      double iterations = ctx->fractal_instance->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
+      double iterations = ctx->fractal_instnc->calc_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS, NULL);
       ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
     }
   } else {
     for (; x < ctx->engine->width; x++, math_x += dx) {
-      double iterations = ctx->fractal_instance->calculate_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS,
-                                                                  ctx->julia_config);
+      double iterations = ctx->fractal_instnc->calc_escape(math_x, start.y, FRACTAL_MAX_ITERATIONS, ctx->julia_cfg);
       ctx->engine->iteration_buffer[y * ctx->engine->width + x] = iterations;
     }
   }
@@ -138,8 +137,8 @@ int main(int argc, char* argv[]) {
         .vp = &vp,
         .frame_counter = frameCounter,
         .lut = &PALETTE_LUTS[engine.palette_index],
-        .fractal_instance = &fractal_instances[engine.fractal_index],
-        .julia_config = JuliaConfigs[engine.julia_index],
+        .fractal_instnc = &fractal_instances[engine.fractal_index],
+        .julia_cfg = JuliaConfigs[engine.julia_index],
     };
 
     if (vp.dirty) {

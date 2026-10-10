@@ -1,5 +1,6 @@
 #pragma once
 #include <stddef.h>
+#include <arm_neon.h>
 
 #define IMPLEMENTED_FRACTALS_NUM 4
 
@@ -13,7 +14,7 @@ typedef enum {
   FRACTAL_NEWTON,
   SIERPINSKI_TRIANGLE, //todo implement
   KOCH_SNOWFLAKE, // todo implement
-  BARNSLEY_FAN,  // todo implement
+  BARNSLEY_FAN, // todo implement
 } FRACTAL_TYPES;
 
 typedef struct {
@@ -22,8 +23,9 @@ typedef struct {
   /**
   * Takes a mathematical coordinate (x,y) and returns the iteration result.
    */
-  double (*calculate_escape)(double math_x, double math_y, double max_iter, const void *custom_params);
-  void (*get_default_viewport)(double *out_center_x, double *out_center_y, double *out_zoom);
+  double (*calc_escape)(double math_x, double math_y, double max_iter, const void* custom_params);
+  float64x2_t (*calc_escape_2x)(double math_x, double dx, double math_y, size_t max_iter, const void* custom_params);
+  void (*get_default_viewport)(double* out_center_x, double* out_center_y, double* out_zoom);
 
   void (*destroy)(void* custom_data);
 } FractalInterface;
@@ -32,10 +34,8 @@ typedef struct {
   const FractalInterface* vtable;
   size_t max_iterations;
   double escape_radius_sq; // pre-squared to avoid extra calculation to sqrt
-  void *custom_data;
+  void* custom_data;
 } FractalInstance;
 
 
 double escape_fractal(FractalInterface* config, double x, double y);
-
-
